@@ -11,4 +11,4 @@ install
 
 run app
 - npm run dev
-- api available at http://localhost:3000/api/catalogs
+- api available at http://localhost:3000/api/catalogs|albums|tracks|playlists|genre|moods
