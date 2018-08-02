@@ -9,6 +9,8 @@ const mood = require ('../controller/mood')
 
 let router = express();
 
+router.use(express.json())
+
 router.use('/catalogs', catalog({db}))
 router.use('/albums', album({db}))
 router.use('/tracks', track({db}))
