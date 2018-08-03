@@ -8,7 +8,7 @@ module.exports = ({db}) => {
 
     api.get('/', async(req, res) => {
         try {
-            const response = await trackRepo.getTrack()
+            const response = await trackRepo.getTrack(req)
             res.send(response)
         } catch (e) {
             res.status(500).send({
@@ -23,7 +23,7 @@ module.exports = ({db}) => {
 
     api.get('/:id', async(req, res) => {
         try {
-            const response = await trackRepo.getTrack(req.params.id)
+            const response = await trackRepo.getTrackById(req.params.id, req)
             res.send(response)
         } catch (e) {
             res.status(500).send({
@@ -39,7 +39,7 @@ module.exports = ({db}) => {
 
     api.get('/:id/tracksalternate', async(req, res) => {
         try {
-            const response = await trackRepo.getAlternate(req.params.id)
+            const response = await trackRepo.getAlternate(req.params.id, req)
             res.send(response)
         } catch (e) {
             res.status(500).send({
