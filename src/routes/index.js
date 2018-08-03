@@ -18,4 +18,13 @@ router.use('/playlists', playlist({db}))
 router.use('/genre', genre({db}))
 router.use('/moods', mood({db}))
 
+//404 not found
+router.use((req, res, next) =>  {
+    res.status(404).send({
+        status: 404,
+        statusText: 'route not found',
+        errors: []
+    })
+})
+
 module.exports = router
