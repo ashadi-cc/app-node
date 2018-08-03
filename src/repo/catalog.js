@@ -3,34 +3,66 @@ module.exports = (db) => {
 
     let module = {};
 
-    module.getCatalog = async function (id) {
-        let where = ''
-        if (id) {
-            where = `AND id_label = ${id}`
+    const mapFields = {
+        "id": "id_label",
+        "name": "label"
+    }
+
+    const defaultField = 'name'
+
+    const mainWhere = `agentcode = 'SOR'`
+
+    // mapping field function
+    const mappingField = (fields, record) => {
+        let rec = {
+            id: record[mapFields.id].toString(),
+            type: 'catalogs',
+            attributes: {}
         }
-    
-        const sql = `Select id_label, label from music Where  agentcode = 'SOR' ${where} group by id_label, label order by label`
-        const result = await db.query(sql)
-        let data = []
-    
-        result.forEach(element => {
-          data.push({
-              type : 'catalogs',
-              id: element.id_label.toString(),
-              attributes: {
-                  name: element.label
-              }
-          })  
+
+        fields.forEach(element => {
+            if (mapFields[element]) {
+                rec.attributes[element] = record[mapFields[element]]
+            }
         })
-    
-        if (id) {
-            data = data.length ? data[0] : {}
-        }
-    
+
+        return rec
+    }
+
+    module.getBaseCatalog = async function(requestFields, whereClause, customAttribute) {
+        requestFields = requestFields ? requestFields : defaultField
+
+        let arrayqueryField = requestFields.toString().toLowerCase().split(',')
+        arrayqueryField = arrayqueryField.filter(e => e !== 'id')
+
+        const fields = Object.values(mapFields).join(',')
+        const sql = `select ${fields} from music where ${mainWhere} ${whereClause} ${customAttribute}`
+        const catalogResult = await db.query(sql)
+
+        let data = [], item
+        catalogResult.forEach(element => {
+            item = mappingField(arrayqueryField, element)
+            data.push(item)
+        })
+
         const response = {
             "data": data
         }
     
+        return response
+    }
+
+    module.getCatalog = async function (req, id) {
+        //request fields
+        const requestFields = req.query.fields ? req.query.fields : ''
+        const whereClause = id ? `and id_label = '${id}'` : ``
+        const customAttribute = 'group by id_label, label order by label'
+        let response = await this.getBaseCatalog(requestFields, whereClause, customAttribute)
+        
+        if (id) {
+            response.data = response.data.length ? response.data[0]: {}
+        }
+        
         return response
     }
 

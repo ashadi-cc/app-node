@@ -8,7 +8,7 @@ module.exports = ({db}) => {
     
     api.get('/', async(req, res) => {
         try {
-            const response = await catalogRepo.getCatalog()
+            const response = await catalogRepo.getCatalog(req)
             res.send(response)
         } catch (e) {
             res.status(500).send({
@@ -23,7 +23,7 @@ module.exports = ({db}) => {
 
     api.get('/:id', async(req, res) => {
         try {
-            const response = await catalogRepo.getCatalog(req.params.id)
+            const response = await catalogRepo.getCatalog(req, req.params.id)
             res.send(response)
         } catch (e) {
             res.status(500).send({
