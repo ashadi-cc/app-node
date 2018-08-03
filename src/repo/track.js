@@ -66,6 +66,7 @@ module.exports = (db) => {
         let arrayqueryField = requestFields.toString().toLowerCase().split(',')
         //remove id
         arrayqueryField = arrayqueryField.filter(e => e !== 'id');
+        arrayqueryField = arrayqueryField.filter(e => e !== 'path');
 
         musicResult.forEach(element => {
             item = mappingField(arrayqueryField, element)
