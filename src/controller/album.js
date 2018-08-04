@@ -6,6 +6,9 @@ module.exports = ({db}) => {
 
     const repoAlbum = album(db)
 
+    /**
+     * Api /catalogs
+     */
     api.get('/', async(req, res) => {
         try {
             const response = await repoAlbum.getAlbum(req)
@@ -22,6 +25,9 @@ module.exports = ({db}) => {
         }
     })
 
+    /**
+     * Api /catalogs/id
+     */
     api.get('/:id', async(req, res) => {
         try {
             const response = await repoAlbum.getAlbum(req, req.params.id)
@@ -37,7 +43,9 @@ module.exports = ({db}) => {
         }
     })
 
-
+    /**
+     * Api /catalogs/id/tracks
+     */
     api.get('/:id/tracks', async(req, res) => {
         try {
             const response = await repoAlbum.getTrack(req, req.params.id)

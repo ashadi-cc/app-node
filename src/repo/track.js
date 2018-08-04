@@ -18,11 +18,14 @@ module.exports = (db) => {
         "path": "path",
         "duration": "duration",
         "tempobpm": "tempobpm",
-        "trackversion": "trackversion"
+        "trackversion": "trackversion",
+        "url_audio": "path",
+        "url_coverart": "path",
+        "url_waveform": "path"
     }
 
     //default display fields
-    const defaultField = 'catalog,album,title,track,description,duration,path'
+    const defaultField = 'catalog,album,title,track,description,duration,path,url_audio,url_coverart,url_waveform'
 
     //default where clause
     const mainWhere = `and agentcode = 'SOR'`
@@ -35,26 +38,28 @@ module.exports = (db) => {
             attributes: {}
         }
 
+        //set url attributes
+        let path,folder;
+        path = record.path.toString().replace(':', '/')
+        //filename = Path.basename(path)
+        folder = Path.dirname(path)
+        record.url_audio = 'https://netmixeur.' + path.replace('.wav', '.mp3')
+        record.url_coverart = 'https://netmixeur.' + folder + '/coverart.jpg'
+        record.url_waveform = 'https://netmixeur.' + path.replace('/AudioFiles/', '/AudioFiles/waveforms/').replace('.wav', '.mp3')
+
         fields.forEach(element => {
             if (mapFields[element]) {
                 rec.attributes[element] = record[mapFields[element]]
             }
         })
 
-        //set url attributes
-        let path,folder;
-        path = record.path.toString().replace(':', '/')
-        //filename = Path.basename(path)
-        folder = Path.dirname(path)
-        rec.attributes.url_audio = 'https://netmixeur.' + path.replace('.wav', '.mp3')
-        rec.attributes.url_coverart = 'https://netmixeur.' + folder + '/coverart.jpg'
-        rec.attributes.url_waveform = 'https://netmixeur.' + path.replace('/AudioFiles/', '/AudioFiles/waveforms/').replace('.wav', '.mp3')
-
         return rec
     }
 
     module.getBaseQueryTrack = async function(requestFields, whereClause) {
-        const fields = Object.values(mapFields).join(',')
+        let fields = Object.values(mapFields)
+        fields = [...new Set(fields)].join(',')
+        
         const sql = `select ${fields} from music where ${whereClause} ${mainWhere}`
         const musicResult = await db.query(sql)
 

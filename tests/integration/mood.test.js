@@ -18,6 +18,15 @@ describe('## Moods API', () => {
         it('should return 200', async () => {
             const res = await request.get('/api/moods')
             expect(res.status).toBe(200)
+            expect(res.body.data).toBeInstanceOf(Array)
+        })
+
+        describe('# GET /api/moods?q=aggressive', () => {
+            it('should return aggressive data', async () => {
+                const res = await request.get('/api/moods?q=aggressive')
+                expect(res.status).toBe(200)
+                expect(res.body.data.length).toBeGreaterThan(0)
+            })
         })
     })
 })
