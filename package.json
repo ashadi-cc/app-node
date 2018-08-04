@@ -4,7 +4,7 @@
   "description": "api-cnd",
   "main": "src",
   "scripts": {
-    "dev": "NODE_ENV=dev NODE_PORT=3000 nodemon -w .",
+    "dev": "NODE_ENV=dev NODE_PORT=3000 nodemon -w ./src",
     "test": "NODE_ENV=test NODE_PORT=3000 jest"
   },
   "author": "ashadi.cc@gmail.com",
