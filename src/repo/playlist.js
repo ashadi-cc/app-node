@@ -49,7 +49,7 @@ module.exports = (db) => {
             }
 
             arrayqueryField.forEach(el => {
-                if (mapFields[el]) {
+                if (mapFields.hasOwnProperty(el)) {
                     rec.attributes[el] = element[mapFields[el]]
                 }
             })

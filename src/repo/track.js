@@ -1,8 +1,11 @@
 const Path = require('path')
+const utilDb = require('./util')
 
 module.exports = (db) => {
 
     let module = {}
+
+    const utilDB = utilDb(db)
 
     //mapping fields json => db
     const mapFields = {
@@ -48,7 +51,7 @@ module.exports = (db) => {
         record.url_waveform = 'https://netmixeur.' + path.replace('/AudioFiles/', '/AudioFiles/waveforms/').replace('.wav', '.mp3')
 
         fields.forEach(element => {
-            if (mapFields[element]) {
+            if (mapFields.hasOwnProperty(element)) {
                 rec.attributes[element] = record[mapFields[element]]
             }
         })
@@ -56,11 +59,17 @@ module.exports = (db) => {
         return rec
     }
 
-    module.getBaseQueryTrack = async function(requestFields, whereClause) {
+    module.getBaseQueryTrack = async function(requestFields, whereClause, start, limit) {
         let fields = Object.values(mapFields)
         fields = [...new Set(fields)].join(',')
-        
-        const sql = `select ${fields} from music where ${whereClause} ${mainWhere}`
+
+        let limitString = ''; 
+
+        if (limit) {
+            limitString = `limit ${start}, ${limit}`
+        }
+
+        const sql = `select ${fields} from music where ${whereClause} ${mainWhere} ${limitString}`
         const musicResult = await db.query(sql)
 
         let data = []
@@ -78,8 +87,12 @@ module.exports = (db) => {
             data.push(item)
         })
 
-        const response = {
+        let response = {
             "data": data
+        }
+
+        if (limit) {
+            response.links =  await utilDB.getLinks(start, limit, 'music', `${whereClause} ${mainWhere}`)
         }
     
         return response
@@ -96,7 +109,13 @@ module.exports = (db) => {
         //request fields
         const requestFields = req.query.fields ? req.query.fields : ''
 
-        const response = await this.getBaseQueryTrack(requestFields, whereClause)
+        const {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}
+
+        let response = await this.getBaseQueryTrack(requestFields, whereClause, offset, limit)
+
+        if (response.hasOwnProperty('links')) {
+            response.links = await utilDB.formatLinks(req, response.links)
+        }
 
         return response
     }
@@ -112,7 +131,9 @@ module.exports = (db) => {
         //request fields
         const requestFields = req.query.fields ? req.query.fields : ''
 
-        const response = await this.getBaseQueryTrack(requestFields, whereClause)
+        let response = await this.getBaseQueryTrack(requestFields, whereClause)
+
+        //response.data = response.data.length ? response.data[0] : {}
 
         return response
     }
@@ -133,7 +154,13 @@ module.exports = (db) => {
         
         //request fields
         const requestFields = req.query.fields ? req.query.fields : ''
-        const response = await this.getBaseQueryTrack(requestFields, whereClause)
+        const {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}
+
+        let response = await this.getBaseQueryTrack(requestFields, whereClause, offset, limit)
+
+        if (response.hasOwnProperty('links')) {
+            response.links = await utilDB.formatLinks(req, response.links)
+        }
 
         return response
     }

@@ -34,7 +34,7 @@ module.exports = (db) => {
         }
 
         fields.forEach(element => {
-            if (mapFields[element]) {
+            if (mapFields.hasOwnProperty(element)) {
                 rec.attributes[element] = record[mapFields[element]]
             }
         })
