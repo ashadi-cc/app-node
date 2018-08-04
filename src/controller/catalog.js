@@ -39,7 +39,7 @@ module.exports = ({db}) => {
 
     api.get('/:id/albums', async(req, res) => {
         try {
-            const response = await catalogRepo.getAlbum(req.params.id)
+            const response = await catalogRepo.getAlbum(req, req.params.id)
             res.send(response)
         } catch (e) {
             res.status(500).send({

@@ -8,7 +8,7 @@ module.exports = ({db}) => {
 
     api.get('/', async(req, res) => {
         try {
-            const response = await repoAlbum.getAlbum()
+            const response = await repoAlbum.getAlbum(req)
             res.send(response)
         } catch (e) {
             res.status(500).send({
@@ -23,7 +23,7 @@ module.exports = ({db}) => {
 
     api.get('/:id', async(req, res) => {
         try {
-            const response = await repoAlbum.getAlbum(req.params.id)
+            const response = await repoAlbum.getAlbum(req, req.params.id)
             res.send(response)
         } catch (e) {
             res.status(500).send({
@@ -39,7 +39,7 @@ module.exports = ({db}) => {
 
     api.get('/:id/tracks', async(req, res) => {
         try {
-            const response = await repoAlbum.getTrack(req.params.id)
+            const response = await repoAlbum.getTrack(req, req.params.id)
             res.send(response)
         } catch (e) {
             res.status(500).send({

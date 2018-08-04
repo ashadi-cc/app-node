@@ -1,7 +1,11 @@
 
+const Album = require('./album')
+
 module.exports = (db) => {
 
     let module = {};
+
+    const albumRepo = Album(db)
 
     const mapFields = {
         "id": "id_label",
@@ -66,27 +70,10 @@ module.exports = (db) => {
         return response
     }
 
-    module.getAlbum = async function (id) {
-        const sql = `select id_disc, disc, label, folder from music where agentcode = 'SOR' and id_label = ${id} group by id_disc, disc, label, folder`
-    
-        const result = await db.query(sql)
-        let data = []
-    
-        result.forEach(element => {
-          data.push({
-              type : 'albums',
-              id: element.id_disc.toString(),
-              attributes: {
-                  name: element.disc,
-                  catalog: element.label, 
-                  url_coverart: element.folder
-              }
-          })  
-        })
-    
-        const response = {
-            "data": data
-        }
+    module.getAlbum = async function (req, id) {
+        const requestFields = req.query.fields ? req.query.fields : ''
+        const whereClause = `and id_label = '${id}'`
+        const response = await albumRepo.getBaseQueryAlbum(requestFields, whereClause)
     
         return response
     }

@@ -1,36 +1,65 @@
 
+const Path = require('path')
+const Track = require('./track')
+
 module.exports = (db) => {
 
+    const trackRepo = Track(db)
+
     let module = {}
-    
-    module.getAlbum = async function (id) {
-        let where = '';
-    
-        if (id) {
-            where = `and id_disc = ${id}`
+
+    const mapFields = {
+        "id": "id_disc",
+        "name": "disc",
+        "catalog": "label",
+        "url_coverart": "folder"
+    }
+
+    const defaultField = 'name,catalog,url_coverart'
+
+    const mainWhere = `agentcode = 'SOR'`
+
+    // mapping field function
+    const mappingField = (fields, record) => {
+
+        let folder = record.folder.toString().replace(':', '/')
+        folder = Path.dirname(folder)
+
+        record.folder = `https://netmixeur.${folder}/coverart.jpg`
+        
+        let rec = {
+            id: record[mapFields.id].toString(),
+            type: 'albums',
+            attributes: {}
         }
-    
-        const sql = `select id_disc, disc, label, folder from music where agentcode = 'SOR' ${where} group by id_disc, disc, label, folder`
-    
-        const result = await db.query(sql)
-        let data = []
-    
-        result.forEach(element => {
-          data.push({
-              type : 'albums',
-              id: element.id_disc.toString(),
-              attributes: {
-                  name: element.disc,
-                  catalog: element.label, 
-                  url_coverart: element.folder
-              }
-          })  
+
+        fields.forEach(element => {
+            if (mapFields[element]) {
+                rec.attributes[element] = record[mapFields[element]]
+            }
         })
-    
-        if (id) {
-            data = data.length ? data[0] : {}
-        }
-    
+
+        return rec
+    }
+
+    module.getBaseQueryAlbum = async function(requestFields, whereClause) {
+        const fields = Object.values(mapFields).join(',')
+        const sql = `select ${fields} from music where ${mainWhere} ${whereClause} group by ${fields} order by disc`
+        
+        const albumResult = await db.query(sql)
+
+        requestFields = requestFields ? requestFields : defaultField
+        let arrayqueryField = requestFields.toString().toLowerCase().split(',')
+        arrayqueryField = arrayqueryField.filter(e => e !== 'id')
+
+        let data = []
+        let item;
+
+        albumResult.forEach(element => {
+            item = mappingField(arrayqueryField, element)
+            data.push(item)
+        })
+
         const response = {
             "data": data
         }
@@ -38,39 +67,26 @@ module.exports = (db) => {
         return response
     }
     
-    module.getTrack = async function (id) {
-        const fields = 'recid,title,track,description,duration,moods,music_styles,tempobpm,trackversion,path'
-        const where = `where agentcode = 'SOR' and id_disc = ${id} and mainversion = 1`
-        const sql = `select ${fields} from music ${where}`
-    
-        const result = await db.query(sql)
-        let data = []
-    
-        result.forEach(element => {
-          data.push({
-              type : 'tracks',
-              id: element.recid.toString(),
-              attributes: {
-                title: element.title,
-                track: element.track,
-                description: element.description,
-                duration: element.duration,
-                moods: element.moods,
-                genre: element.genre,
-                tempobpm: element.tempobpm,
-                trackversion: element.trackversion,
-                url_audio: element.path,
-                url_coverart: element.path,
-                url_waveform: element.path
-              }
-          })  
-        })
-    
-        const response = {
-            "data": data
+    module.getAlbum = async function (req, id) {
+        //request fields
+        const requestFields = req.query.fields ? req.query.fields : ''
+        const whereClause = id ? `and id_disc = '${id}'` : ``
+        let response = await this.getBaseQueryAlbum(requestFields, whereClause)
+        
+        if (id) {
+            response.data = response.data.length ? response.data[0]: {}
         }
+        
+        return response
+    }
     
-        return response    
+    module.getTrack = async function (req, id) {
+        const requestFields = req.query.fields ? req.query.fields : ''
+        const whereClause = `id_disc = '${id}' and mainversion = 1`
+
+        const response = await trackRepo.getBaseQueryTrack(requestFields, whereClause)
+    
+        return response
     }
 
     return module
