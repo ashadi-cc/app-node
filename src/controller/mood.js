@@ -7,7 +7,7 @@ module.exports = ({db}) => {
 
     api.get('/', async(req, res) => {
         try {
-            const response = await moodRepo.getMood()
+            const response = await moodRepo.getMood(req)
             res.send(response)
         } catch (e) {
             res.status(500).send({

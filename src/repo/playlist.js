@@ -28,6 +28,12 @@ module.exports = (db) => {
         arrayqueryField = arrayqueryField.filter(e => e !== 'id');
 
         let where = `published = 1 AND publishdatestart <= CURDATE()  and CURDATE() <= publishdateend and action like 'spot%'`; 
+        
+        if (req.query.q) {
+            const q = req.query.q
+            where += ` and title like '%${q}%'`
+        }
+        
         const fields = `id,title,description,concat('https://www.redbullaudiolibrary.com/',imagepath) as imagepath`
         const sql = `select ${fields} from _playlistbuttons WHERE  ${where} order by displayorder`
         
@@ -62,7 +68,7 @@ module.exports = (db) => {
         let sql = `select action from _playlistbuttons where id = ${id}`
         const result = await db.query(sql)
 
-        if (!result.length) return []
+        if (!result.length) return {"data": []}
 
         const rec = result[0]
         let whereClause = ''
@@ -77,8 +83,13 @@ module.exports = (db) => {
             }
         }
 
-        if (whereClause == '') return []
+        if (whereClause == '') return {"data": []}
 
+        if (req.query.q) {
+            const q = req.query.q
+            whereClause += ` and description like '%${q}%'`
+        }
+        
         //request fields
         const requestFields = req.query.fields ? req.query.fields : ''
 

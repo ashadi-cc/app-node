@@ -70,7 +70,13 @@ module.exports = (db) => {
     module.getAlbum = async function (req, id) {
         //request fields
         const requestFields = req.query.fields ? req.query.fields : ''
-        const whereClause = id ? `and id_disc = '${id}'` : ``
+        let whereClause = id ? `and id_disc = '${id}'` : ``
+
+        if (req.query.q) {
+            const q = req.query.q
+            whereClause += ` and disc like '%${q}%'`
+        }
+
         let response = await this.getBaseQueryAlbum(requestFields, whereClause)
         
         if (id) {
@@ -82,7 +88,12 @@ module.exports = (db) => {
     
     module.getTrack = async function (req, id) {
         const requestFields = req.query.fields ? req.query.fields : ''
-        const whereClause = `id_disc = '${id}' and mainversion = 1`
+        let whereClause = `id_disc = '${id}' and mainversion = 1`
+
+        if (req.query.q) {
+            const q = req.query.q
+            whereClause += ` and description like '%${q}%'`
+        }
 
         const response = await trackRepo.getBaseQueryTrack(requestFields, whereClause)
     

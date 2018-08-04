@@ -8,7 +8,7 @@ module.exports = ({db}) => {
 
     api.get('/', async(req, res) => {
         try {
-            const response = await genreRepo.getGenre()
+            const response = await genreRepo.getGenre(req)
             res.send(response)
         } catch (e) {
             res.status(500).send({

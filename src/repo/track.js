@@ -81,8 +81,13 @@ module.exports = (db) => {
     }
     
     module.getTrack = async function (req) {
-        const whereClause = `mainversion = 1`
+        let whereClause = `mainversion = 1`
         
+        if (req.query.q) {
+            const q = req.query.q
+            whereClause += ` and description like '%${q}%'`
+        }
+
         //request fields
         const requestFields = req.query.fields ? req.query.fields : ''
 
@@ -92,7 +97,12 @@ module.exports = (db) => {
     }
 
     module.getTrackById = async function (id, req) {
-        const whereClause = `recid = '${id}'`
+        let whereClause = `recid = '${id}'`
+
+        if (req.query.q) {
+            const q = req.query.q
+            whereClause += ` and description like '%${q}%'`
+        }
 
         //request fields
         const requestFields = req.query.fields ? req.query.fields : ''
@@ -109,7 +119,13 @@ module.exports = (db) => {
         if (!result.length) return {"data": []}
 
         const rec = result[0]
-        const whereClause = `trackspertitle = '${rec.trackspertitle}' and id_disc = ${rec.id_disc} and recid <> ${id}`
+        let whereClause = `trackspertitle = '${rec.trackspertitle}' and id_disc = ${rec.id_disc} and recid <> ${id}`
+
+        if (req.query.q) {
+            const q = req.query.q
+            whereClause += ` and description like '%${q}%'`
+        }
+        
         //request fields
         const requestFields = req.query.fields ? req.query.fields : ''
         const response = await this.getBaseQueryTrack(requestFields, whereClause)

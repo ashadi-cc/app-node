@@ -11,6 +11,7 @@ module.exports = ({db}) => {
             const response = await repoAlbum.getAlbum(req)
             res.send(response)
         } catch (e) {
+            console.error(e)
             res.status(500).send({
                 status: 500,
                 statusText: 'Something went wrong',
@@ -42,6 +43,7 @@ module.exports = ({db}) => {
             const response = await repoAlbum.getTrack(req, req.params.id)
             res.send(response)
         } catch (e) {
+            console.error(e)
             res.status(500).send({
                 status: 500,
                 statusText: 'Something went wrong',
