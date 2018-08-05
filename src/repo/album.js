@@ -1,10 +1,13 @@
 
 const Path = require('path')
 const Track = require('./track')
+const Util = require('./util')
 
 module.exports = (db) => {
 
     const trackRepo = Track(db)
+
+    const utilDB = Util(db)
 
     let module = {}
 
@@ -42,9 +45,16 @@ module.exports = (db) => {
         return rec
     }
 
-    module.getBaseQueryAlbum = async function(requestFields, whereClause) {
+    module.getBaseQueryAlbum = async function(requestFields, whereClause, start, limit) {
         const fields = Object.values(mapFields).join(',')
-        const sql = `select ${fields} from music where ${mainWhere} ${whereClause} group by ${fields} order by disc`
+
+        let limitString = ''; 
+
+        if (limit) {
+            limitString = `limit ${start}, ${limit}`
+        }
+
+        const sql = `select ${fields} from music where ${mainWhere} ${whereClause} group by ${fields} order by disc ${limitString}`
         
         const albumResult = await db.query(sql)
 
@@ -60,8 +70,12 @@ module.exports = (db) => {
             data.push(item)
         })
 
-        const response = {
+        let response = {
             "data": data
+        }
+
+        if (limit) {
+            response.links = await utilDB.getLinks(start, limit, 'music', `${mainWhere} ${whereClause}`, fields)
         }
     
         return response
@@ -77,10 +91,16 @@ module.exports = (db) => {
             whereClause += ` and disc like '%${q}%'`
         }
 
-        let response = await this.getBaseQueryAlbum(requestFields, whereClause)
+        let {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}
+
+        if (id) limit = 0
+
+        let response = await this.getBaseQueryAlbum(requestFields, whereClause, offset, limit)
         
         if (id) {
             response.data = response.data.length ? response.data[0]: {}
+        } else {
+            response.links = await utilDB.formatLinks(req, response.links)
         }
         
         return response
@@ -95,8 +115,12 @@ module.exports = (db) => {
             whereClause += ` and description like '%${q}%'`
         }
 
-        const response = await trackRepo.getBaseQueryTrack(requestFields, whereClause)
+        let {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}
+
+        let response = await trackRepo.getBaseQueryTrack(requestFields, whereClause, offset, limit)
     
+        response.links = await utilDB.formatLinks(req, response.links)
+        
         return response
     }
 

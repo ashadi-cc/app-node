@@ -6,14 +6,19 @@ const util = db => {
         let sql;
 
         if (groupBy) {
-            sql = `SELECT COUNT(${groupBy}) AS total FROM ${table} WHERE ${where}`
+            sql = `SELECT COUNT(DISTINCT ${groupBy}) AS total FROM ${table} WHERE ${where}`
         } else {
             sql = `SELECT count(*) AS total FROM ${table} WHERE ${where}`
         }
         const result = await db.query(sql)
 
         const total = result.length ? result[0]['total'] : 0
-        const lastOffset = (Math.floor((total / limit)) * limit) - limit
+        let lastOffset = (Math.floor((total / limit)) * limit)
+
+        if (lastOffset >= total) {
+            lastOffset = lastOffset - limit
+        }
+
         const prev = (start == 0) ? null : (start - limit)
         const next = ((start + limit) >= total) ? null : (start + limit)
 

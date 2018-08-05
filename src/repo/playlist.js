@@ -1,8 +1,11 @@
 const Track = require('./track')
+const Util = require('./util')
 
 module.exports = (db) => {
     
     let module = {}
+
+    const utilDB = Util(db)
     
     const TrackRepo = Track(db)
 
@@ -34,8 +37,11 @@ module.exports = (db) => {
             where += ` and title like '%${q}%'`
         }
         
+        //limit and offset
+        const {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}
+
         const fields = `id,title,description,concat('https://www.redbullaudiolibrary.com/',imagepath) as imagepath`
-        const sql = `select ${fields} from _playlistbuttons WHERE  ${where} order by displayorder`
+        const sql = `select ${fields} from _playlistbuttons WHERE  ${where} order by displayorder limit ${offset}, ${limit}`
         
         const result = await db.query(sql)
         let data = []
@@ -57,8 +63,13 @@ module.exports = (db) => {
             data.push(rec) 
         })
     
+        let links = await utilDB.getLinks(offset, limit, '_playlistbuttons', where)
+        
+        links = await utilDB.formatLinks(req, links)
+
         const response = {
-            "data": data
+            "data": data,
+            "links": links
         }
     
         return response    
@@ -93,8 +104,12 @@ module.exports = (db) => {
         //request fields
         const requestFields = req.query.fields ? req.query.fields : ''
 
-        const response = await TrackRepo.getBaseQueryTrack(requestFields, whereClause)
+        const {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}
 
+        let response = await TrackRepo.getBaseQueryTrack(requestFields, whereClause, offset, limit)
+
+        response.links = await utilDB.formatLinks(req, response.links)
+        
         return response
     }
 

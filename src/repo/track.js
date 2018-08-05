@@ -1,11 +1,11 @@
 const Path = require('path')
-const utilDb = require('./util')
+const Util = require('./util')
 
 module.exports = (db) => {
 
     let module = {}
 
-    const utilDB = utilDb(db)
+    const utilDB = Util(db)
 
     //mapping fields json => db
     const mapFields = {
@@ -50,9 +50,14 @@ module.exports = (db) => {
         record.url_coverart = 'https://netmixeur.' + folder + '/coverart.jpg'
         record.url_waveform = 'https://netmixeur.' + path.replace('/AudioFiles/', '/AudioFiles/waveforms/').replace('.wav', '.mp3')
 
+        let cloneMapFields = Object.assign({}, mapFields)
+        cloneMapFields.url_audio = 'url_audio'
+        cloneMapFields.url_coverart = 'url_coverart'
+        cloneMapFields.url_waveform = 'url_waveform'
+
         fields.forEach(element => {
-            if (mapFields.hasOwnProperty(element)) {
-                rec.attributes[element] = record[mapFields[element]]
+            if (cloneMapFields.hasOwnProperty(element)) {
+                rec.attributes[element] = record[cloneMapFields[element]]
             }
         })
 
