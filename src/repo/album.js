@@ -81,6 +81,31 @@ module.exports = (db) => {
         return response
     }
     
+    const includeTrack = async (idDisk) => {
+        const whereClause = `id_disc = '${idDisk}' and mainversion = 1`
+        const response = await trackRepo.getBaseQueryTrack('', whereClause)
+
+        let relationship = { tracks: { data : [] } }
+        let included = [];
+
+        response.data.forEach(element => {
+            relationship.tracks.data.push({
+                "id" : element.id, 
+                "type" : element.type
+            })
+
+            included.push({
+                "id" : element.id,
+                "type": element.type,
+                "attributes": {
+                    "title": element.attributes.title
+                }
+            })
+        })
+
+        return { relationship, included}
+    }
+    
     module.getAlbum = async function (req, id) {
         //request fields
         const requestFields = req.query.fields ? req.query.fields : ''
@@ -98,7 +123,16 @@ module.exports = (db) => {
         let response = await this.getBaseQueryAlbum(requestFields, whereClause, offset, limit)
         
         if (id) {
+            
             response.data = response.data.length ? response.data[0]: {}
+            const {include} = req.query
+            if (include && (include == 'tracks')) {
+                const { relationship, included} = await includeTrack(id)
+
+                response.data.relationship = relationship
+                response.included = included
+            }
+
         } else {
             response.links = await utilDB.formatLinks(req, response.links)
         }
