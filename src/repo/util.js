@@ -2,6 +2,14 @@ const util = db => {
     
     let module = {}
 
+    const filterMap = {
+        "eq" : "=",
+        "gt" : ">",
+        "gte" : ">=",
+        "lt" : "<",
+        "lte" : "<="
+    }
+
     module.getLinks = async (start, limit, table, where, groupBy) => {
         let sql;
 
@@ -62,6 +70,32 @@ const util = db => {
         }
 
         return links
+    }
+
+    module.formatFilter = async (mapFields, filter) => {
+        let result = []
+        let query = filter.toString().split(' ')
+
+        let validOperator = false
+        let validFields = false
+
+        query.forEach(element => {
+            if (element.match(/('|"|`|\s)/g)) {
+                result.push(element)
+            } else if (filterMap.hasOwnProperty(element)) {
+                validOperator = true
+                result.push(filterMap[element])
+            } else if (mapFields.hasOwnProperty(element)) {
+                validFields = true
+                result.push(mapFields[element])
+            } else {
+                result.push(element)
+            }
+        })
+
+        if (validFields && validOperator) return result.join(' ')
+
+        return `1=2`
     }
 
     return module

@@ -64,6 +64,8 @@ module.exports = (db) => {
         return rec
     }
 
+    module.mapFields = mapFields
+
     module.getBaseQueryTrack = async function(requestFields, whereClause, start, limit) {
         let fields = Object.values(mapFields)
         fields = [...new Set(fields)].join(',')
@@ -111,6 +113,13 @@ module.exports = (db) => {
             whereClause += ` and description like '%${q}%'`
         }
 
+        const {filter} = req.query
+        if (filter) {
+            const filterQuery = await utilDB.formatFilter(mapFields, filter)
+            whereClause += ` and (${filterQuery})`
+        }
+
+
         //request fields
         const requestFields = req.query.fields ? req.query.fields : ''
 
@@ -156,7 +165,13 @@ module.exports = (db) => {
             const q = req.query.q
             whereClause += ` and description like '%${q}%'`
         }
-        
+
+        const {filter} = req.query
+        if (filter) {
+            const filterQuery = await utilDB.formatFilter(mapFields, filter)
+            whereClause += ` and (${filterQuery})`
+        }
+
         //request fields
         const requestFields = req.query.fields ? req.query.fields : ''
         const {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}

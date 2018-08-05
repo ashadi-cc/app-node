@@ -45,6 +45,8 @@ module.exports = (db) => {
         return rec
     }
 
+    module.mapFields = mapFields
+
     module.getBaseQueryAlbum = async function(requestFields, whereClause, start, limit) {
         const fields = Object.values(mapFields).join(',')
 
@@ -116,6 +118,14 @@ module.exports = (db) => {
             whereClause += ` and disc like '%${q}%'`
         }
 
+        if (id == undefined) {
+            const {filter} = req.query
+            if (filter) {
+                const filterQuery = await utilDB.formatFilter(mapFields, filter)
+                whereClause += ` and (${filterQuery})`
+            }
+        }
+
         let {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}
 
         if (id) limit = 0
@@ -147,6 +157,12 @@ module.exports = (db) => {
         if (req.query.q) {
             const q = req.query.q
             whereClause += ` and description like '%${q}%'`
+        }
+
+        const {filter} = req.query
+        if (filter) {
+            const filterQuery = await utilDB.formatFilter(trackRepo.mapFields, filter)
+            whereClause += ` and (${filterQuery})`
         }
 
         let {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}

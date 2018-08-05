@@ -36,6 +36,12 @@ module.exports = (db) => {
             const q = req.query.q
             where += ` and title like '%${q}%'`
         }
+
+        const {filter} = req.query
+        if (filter) {
+            const filterQuery = await utilDB.formatFilter(mapFields, filter)
+            where += ` and (${filterQuery})`
+        }
         
         //limit and offset
         const {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}
@@ -99,6 +105,12 @@ module.exports = (db) => {
         if (req.query.q) {
             const q = req.query.q
             whereClause += ` and description like '%${q}%'`
+        }
+
+        const {filter} = req.query
+        if (filter) {
+            const filterQuery = await utilDB.formatFilter(TrackRepo.mapFields, filter)
+            whereClause += ` and (${filterQuery})`
         }
         
         //request fields

@@ -4,6 +4,10 @@ module.exports = (db) => {
     let module = {}
 
     const utilDB = Util(db)
+
+    const mapFields = {
+        "name" : "theword"
+    }
     
     module.getGenre = async function (req) {
 
@@ -14,6 +18,12 @@ module.exports = (db) => {
         if (req.query.q) {
             const q = req.query.q
             where += ` and theword like '%${q}%'`
+        }
+
+        const {filter} = req.query
+        if (filter) {
+            const filterQuery = await utilDB.formatFilter(mapFields, filter)
+            where += ` and (${filterQuery})`
         }
 
         const sql = `select id,theword as music_styles from _uniquewords where ${where} limit ${offset}, ${limit}`
