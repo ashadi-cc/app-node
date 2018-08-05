@@ -16,7 +16,6 @@ module.exports = ({db}) => {
                 status: 500,
                 statusText: 'Something went wrong',
                 errors: [
-                    e
                 ]
             })
         }
@@ -32,7 +31,6 @@ module.exports = ({db}) => {
                 status: 500,
                 statusText: 'Something went wrong',
                 errors: [
-                    e
                 ]
             })
         }
