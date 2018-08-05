@@ -32,8 +32,6 @@ module.exports = (db) => {
           })  
         })
 
-       
-
         let links = await utilDB.getLinks(offset, limit, '_uniquewords', where)
 
         links = await utilDB.formatLinks(req, links)
