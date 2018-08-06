@@ -73,23 +73,22 @@ const util = db => {
     }
 
     module.formatFilter = async (mapFields, filter) => {
-        let result = []
         let query = filter.toString().split(' ')
 
         let validOperator = false
         let validFields = false
 
-        query.forEach(element => {
+        const result = query.map(element => {
             if (element.match(/('|"|`|\s)/g)) {
-                result.push(element)
+                return element
             } else if (filterMap.hasOwnProperty(element)) {
                 validOperator = true
-                result.push(filterMap[element])
+                return filterMap[element]
             } else if (mapFields.hasOwnProperty(element)) {
                 validFields = true
-                result.push(mapFields[element])
+                return mapFields[element]
             } else {
-                result.push(element)
+                return element
             }
         })
 
