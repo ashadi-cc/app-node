@@ -5,9 +5,13 @@ const util = db => {
     const filterMap = {
         "eq" : "=",
         "gt" : ">",
-        "gte" : ">=",
+        "ge" : ">=",
         "lt" : "<",
-        "lte" : "<="
+        "le": "<=",
+        "ne" : "<>",
+        "not": "not",
+        "lk": "like"
+
     }
 
     module.getLinks = async (start, limit, table, where, groupBy) => {
@@ -77,18 +81,31 @@ const util = db => {
 
         let validOperator = false
         let validFields = false
-
-        const result = query.map(element => {
+        let tmp;
+        let result = []
+        query.forEach(element => {
             if (element.match(/('|"|`|\s)/g)) {
-                return element
+                result.push(element)
             } else if (filterMap.hasOwnProperty(element)) {
                 validOperator = true
-                return filterMap[element]
+                result.push(filterMap[element])
             } else if (mapFields.hasOwnProperty(element)) {
                 validFields = true
-                return mapFields[element]
+                result.push(mapFields[element])
+            } else if (element.match(/^\(/g)) {
+                tmp = element.replace(/^\(/g, '')
+                if (filterMap.hasOwnProperty(tmp)) {
+                    validOperator = true
+                    result.push(`(${filterMap[tmp]}`)
+                } else if (mapFields.hasOwnProperty(tmp)) {
+                    validFields = true
+                    result.push(`(${mapFields[tmp]}`)
+                } else {
+                    result.push(`(${tmp}`)
+                }
+
             } else {
-                return element
+                result.push(element)
             }
         })
 

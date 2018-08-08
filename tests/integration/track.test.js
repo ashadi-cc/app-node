@@ -80,5 +80,12 @@ describe('## Tracks API', () => {
             })
         })
 
+        describe('#GET /api/tracks/?filter=(title lk `track` and duration ge 180)', () => {
+            it('should return 200', async () => {
+                const res = await request.get('/api/tracks/?filter=(title lk `track` and duration ge 180)')
+                expect(res.status).toBe(200)
+            })
+        })
+
     })
 })
