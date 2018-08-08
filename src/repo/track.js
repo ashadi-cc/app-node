@@ -21,7 +21,7 @@ module.exports = (db) => {
         "track": "track",
         "description": "description",
         "moods": "moods",
-        "music_styles": "music_styles",
+        "genre": "music_styles",
         "path": "path",
         "duration": "duration",
         "tempobpm": "tempobpm",
@@ -32,7 +32,7 @@ module.exports = (db) => {
     }
 
     //default display fields
-    const defaultField = 'catalog,album,title,track,description,duration,path,url_audio,url_coverart,url_waveform'
+    const defaultField = 'catalog,album,title,track,moods,genre,tempobpm,trackversion,description,duration,path,url_audio,url_coverart,url_waveform'
 
     //default where clause
     const mainWhere = `and agentcode = 'SOR'`
@@ -183,7 +183,7 @@ module.exports = (db) => {
         const {fields} = requestData.queryData
         //request fields
         const requestFields = fields.hasOwnProperty('tracks') ? fields.tracks.join(',') : ''
-        
+
         const {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}
 
         let response = await this.getBaseQueryTrack(requestFields, whereClause, offset, limit)
