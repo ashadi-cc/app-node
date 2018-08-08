@@ -1,11 +1,15 @@
 const Path = require('path')
 const Util = require('./util')
+const JsonApiQueryParser = require('jsonapi-query-parser')
+
 
 module.exports = (db) => {
 
     let module = {}
 
     const utilDB = Util(db)
+
+    const jsonApiParser = new JsonApiQueryParser()
 
     //mapping fields json => db
     const mapFields = {
@@ -119,9 +123,10 @@ module.exports = (db) => {
             whereClause += ` and (${filterQuery})`
         }
 
-
+        const requestData = jsonApiParser.parseRequest(req.url)
+        const {fields} = requestData.queryData
         //request fields
-        const requestFields = req.query.fields ? req.query.fields : ''
+        const requestFields = fields.hasOwnProperty('tracks') ? fields.tracks.join(',') : ''
 
         const {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}
 
@@ -142,8 +147,10 @@ module.exports = (db) => {
             whereClause += ` and description like '%${q}%'`
         }
 
+        const requestData = jsonApiParser.parseRequest(req.url)
+        const {fields} = requestData.queryData
         //request fields
-        const requestFields = req.query.fields ? req.query.fields : ''
+        const requestFields = fields.hasOwnProperty('tracks') ? fields.tracks.join(',') : ''
 
         let response = await this.getBaseQueryTrack(requestFields, whereClause)
 
@@ -172,8 +179,11 @@ module.exports = (db) => {
             whereClause += ` and (${filterQuery})`
         }
 
+        const requestData = jsonApiParser.parseRequest(req.url)
+        const {fields} = requestData.queryData
         //request fields
-        const requestFields = req.query.fields ? req.query.fields : ''
+        const requestFields = fields.hasOwnProperty('tracks') ? fields.tracks.join(',') : ''
+        
         const {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}
 
         let response = await this.getBaseQueryTrack(requestFields, whereClause, offset, limit)

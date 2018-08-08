@@ -29,9 +29,9 @@ describe('## Albums API', () => {
             })
         })
 
-        describe('# GET /api/albums/?fields=name', () => {
+        describe('# GET /api/albums/?fields[albums]=name', () => {
             it('should return name in attributes', async () => {
-                const res = await request.get('/api/albums/?fields=name')
+                const res = await request.get('/api/albums/?fields[albums]=name')
                 expect(res.status).toBe(200)
                 expect(Object.keys(res.body.data[0].attributes).join(',')).toBe('name')
             })
@@ -47,9 +47,9 @@ describe('## Albums API', () => {
             expect(res.body.data).toBeInstanceOf(Object)
         })
 
-        describe('# GET /api/albums/4251549/?fields=name', () => {
+        describe('# GET /api/albums/4251549/?fields[albums]=name', () => {
             it('should return name in attributes', async () => {
-                const res = await request.get('/api/albums/4251549/?fields=name')
+                const res = await request.get('/api/albums/4251549/?fields[albums]=name')
                 expect(res.status).toBe(200)
                 expect(Object.keys(res.body.data.attributes).join(',')).toBe('name')
             })
@@ -72,9 +72,9 @@ describe('## Albums API', () => {
             })
         })
 
-        describe('# GET /api/albums/4251549/tracks?fields=album', () => {
+        describe('# GET /api/albums/4251549/tracks?fields[tracks]=album', () => {
             it('should return album in attributes', async () => {
-                const res = await request.get('/api/albums/4251549/tracks?fields=album')
+                const res = await request.get('/api/albums/4251549/tracks?fields[tracks]=album')
                 expect(res.status).toBe(200)
                 expect(Object.keys(res.body.data[0].attributes).join(',')).toBe('album')
             })

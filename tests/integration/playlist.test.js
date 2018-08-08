@@ -21,9 +21,9 @@ describe('## Playlists API', () => {
             expect(res.body.data).toBeInstanceOf(Array)
         })
 
-        describe('# GET /api/playlists?fields=title', () => {
+        describe('# GET /api/playlists?fields[playlists]=title', () => {
             it('should return title in attributes', async () => {
-                const res = await request.get('/api/playlists?fields=title')
+                const res = await request.get('/api/playlists?fields[playlists]=title')
                 expect(res.status).toBe(200)
                 expect(Object.keys(res.body.data[0].attributes).join(',')).toBe('title')
             })
@@ -46,9 +46,9 @@ describe('## Playlists API', () => {
             expect(res.body.data).toBeInstanceOf(Array)
         })
 
-        describe('# GET /api/playlists/156?fields=title', () => {
+        describe('# GET /api/playlists/156?fields[tracks]=title', () => {
             it('should return title in attributes', async () => {
-                const res = await request.get('/api/playlists/156?fields=title')
+                const res = await request.get('/api/playlists/156?fields[tracks]=title')
                 expect(res.status).toBe(200)
                 expect(Object.keys(res.body.data[0].attributes).join('')).toBe('title')
             })

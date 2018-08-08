@@ -1,6 +1,7 @@
 
 const Album = require('./album')
 const Util = require('./util')
+const JsonApiQueryParser = require('jsonapi-query-parser')
 
 module.exports = (db) => {
 
@@ -9,6 +10,8 @@ module.exports = (db) => {
     const utilDB = Util(db)
 
     const albumRepo = Album(db)
+
+    const jsonApiParser = new JsonApiQueryParser()
 
     const mapFields = {
         "id": "id_label",
@@ -37,6 +40,7 @@ module.exports = (db) => {
     }
 
     module.getBaseCatalog = async function(requestFields, whereClause, customAttribute, start, limit) {
+        
         requestFields = requestFields ? requestFields : defaultField
 
         let arrayqueryField = requestFields.toString().toLowerCase().split(',')
@@ -70,8 +74,11 @@ module.exports = (db) => {
     }
 
     module.getCatalog = async function (req, id) {
+        const requestData = jsonApiParser.parseRequest(req.url)
+        const {fields} = requestData.queryData
+
         //request fields
-        const requestFields = req.query.fields ? req.query.fields : ''
+        const requestFields = fields.hasOwnProperty('catalogs') ? fields.catalogs.join(',') : ''
         let whereClause = id ? `and id_label = '${id}'` : ``
         const customAttribute = 'group by id_label, label order by label'
 
@@ -102,7 +109,10 @@ module.exports = (db) => {
     }
 
     module.getAlbum = async function (req, id) {
-        const requestFields = req.query.fields ? req.query.fields : ''
+        const requestData = jsonApiParser.parseRequest(req.url)
+        const {fields} = requestData.queryData
+
+        const requestFields = fields.hasOwnProperty('albums') ? fields.albums.join(',') : ''
         let whereClause = `and id_label = '${id}'`
 
         if (req.query.q) {

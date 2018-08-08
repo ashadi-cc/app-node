@@ -48,7 +48,7 @@ describe('## Catalogs API', () => {
 
         describe('#GET /api/catalogs/53546/albums?fields=name', () => {
             it('should return name in attributes', async () => {
-                const res = await request.get('/api/catalogs/53546/albums?fields=name')
+                const res = await request.get('/api/catalogs/53546/albums?fields[albums]=name')
                 expect(res.status).toBe(200)
                 expect(Object.keys(res.body.data[0].attributes).join(',')).toBe('name')
             })

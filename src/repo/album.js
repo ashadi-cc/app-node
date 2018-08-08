@@ -2,12 +2,15 @@
 const Path = require('path')
 const Track = require('./track')
 const Util = require('./util')
+const JsonApiQueryParser = require('jsonapi-query-parser')
 
 module.exports = (db) => {
 
     const trackRepo = Track(db)
 
     const utilDB = Util(db)
+
+    const jsonApiParser = new JsonApiQueryParser()
 
     let module = {}
 
@@ -83,9 +86,9 @@ module.exports = (db) => {
         return response
     }
     
-    const includeTrack = async (idDisk) => {
+    const includeTrack = async (idDisk, requestTrackFields) => {
         const whereClause = `id_disc = '${idDisk}' and mainversion = 1`
-        const response = await trackRepo.getBaseQueryTrack('', whereClause)
+        const response = await trackRepo.getBaseQueryTrack(requestTrackFields, whereClause)
 
         let relationship = { tracks: { data : [] } }
         let included = [];
@@ -109,8 +112,11 @@ module.exports = (db) => {
     }
     
     module.getAlbum = async function (req, id) {
+        const requestData = jsonApiParser.parseRequest(req.url)
+        const {fields} = requestData.queryData
+        
         //request fields
-        const requestFields = req.query.fields ? req.query.fields : ''
+        const requestFields = fields.hasOwnProperty('albums') ? fields.albums.join(',') : ''
         let whereClause = id ? `and id_disc = '${id}'` : ``
 
         if (req.query.q) {
@@ -137,7 +143,8 @@ module.exports = (db) => {
             response.data = response.data.length ? response.data[0]: {}
             const {include} = req.query
             if (include && (include == 'tracks')) {
-                const { relationship, included} = await includeTrack(id)
+                const requestTrackFields = fields.hasOwnProperty('tracks') ? fields.tracks.join(',') : ''
+                const { relationship, included} = await includeTrack(id, requestTrackFields)
 
                 response.data.relationship = relationship
                 response.included = included
@@ -151,7 +158,11 @@ module.exports = (db) => {
     }
     
     module.getTrack = async function (req, id) {
-        const requestFields = req.query.fields ? req.query.fields : ''
+
+        const requestData = jsonApiParser.parseRequest(req.url)
+        const {fields} = requestData.queryData
+
+        const requestFields = fields.hasOwnProperty('tracks') ? fields.tracks.join(',') : ''
         let whereClause = `id_disc = '${id}' and mainversion = 1`
 
         if (req.query.q) {

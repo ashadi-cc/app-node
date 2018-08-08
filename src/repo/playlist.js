@@ -1,5 +1,6 @@
 const Track = require('./track')
 const Util = require('./util')
+const JsonApiQueryParser = require('jsonapi-query-parser')
 
 module.exports = (db) => {
     
@@ -8,6 +9,8 @@ module.exports = (db) => {
     const utilDB = Util(db)
     
     const TrackRepo = Track(db)
+
+    const jsonApiParser = new JsonApiQueryParser()
 
     //map fields json => db
     const mapFields = {
@@ -22,11 +25,13 @@ module.exports = (db) => {
 
     //get all playlist
     module.getPlaylist = async function (req) {
+        const requestData = jsonApiParser.parseRequest(req.url)
+        const fieldsRequest = requestData.queryData.fields
 
         //request fields
-        const requestFields = req.query.fields ? req.query.fields : defaultField
+        const requestFields =fieldsRequest.hasOwnProperty('playlists') ? fieldsRequest.playlists.join(',') : defaultField
 
-        let arrayqueryField = requestFields.toString().toLowerCase().split(',');
+        let arrayqueryField = requestFields.split(',')
         //remove id
         arrayqueryField = arrayqueryField.filter(e => e !== 'id');
 
@@ -114,7 +119,10 @@ module.exports = (db) => {
         }
         
         //request fields
-        const requestFields = req.query.fields ? req.query.fields : ''
+        const requestData = jsonApiParser.parseRequest(req.url)
+        const {fields} = requestData.queryData
+
+        const requestFields = fields.hasOwnProperty('tracks') ? fields.tracks.join(',') : ''
 
         const {offset, limit} = req.query.page ? req.query.page : { offset: 0, limit: 5}
 
