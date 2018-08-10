@@ -81,7 +81,7 @@ const util = db => {
 
         let validOperator = false
         let validFields = false
-        let tmp;
+        let tmp, bracket;
         let result = []
         query.forEach(element => {
             if (element.match(/('|"|`|\s)/g)) {
@@ -93,15 +93,16 @@ const util = db => {
                 validFields = true
                 result.push(mapFields[element])
             } else if (element.match(/^\(/g)) {
-                tmp = element.replace(/^\(/g, '')
+                tmp = element.replace(/\(/g, '').trim()
+                bracket = "(".repeat(element.match(/\(/g).length)
                 if (filterMap.hasOwnProperty(tmp)) {
                     validOperator = true
-                    result.push(`(${filterMap[tmp]}`)
+                    result.push(`${bracket}${filterMap[tmp]}`)
                 } else if (mapFields.hasOwnProperty(tmp)) {
                     validFields = true
-                    result.push(`(${mapFields[tmp]}`)
+                    result.push(`${bracket}${mapFields[tmp]}`)
                 } else {
-                    result.push(`(${tmp}`)
+                    result.push(element)
                 }
 
             } else {

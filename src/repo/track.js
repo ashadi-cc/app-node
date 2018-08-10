@@ -84,8 +84,8 @@ module.exports = (db) => {
         if (whereClause.match(/\bduration\b/g)) {
             let el, duration;
             whereClause.split(' ').forEach(element => {
-                el = element.replace(/^\(/g, '');
-                if (el.trim() == 'duration') {
+                el = element.replace(/\(/g, '').trim();
+                if (el == 'duration') {
                     duration = true;
                 }
             });
@@ -93,8 +93,6 @@ module.exports = (db) => {
                 whereClause = whereClause.replace(/mainversion = 1/i, '1 = 1');
             }
         }
-
-
         const sql = `select ${fields} from music where ${whereClause} ${mainWhere} ${limitString}`
         const musicResult = await db.query(sql)
 
