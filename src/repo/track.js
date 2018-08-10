@@ -80,6 +80,21 @@ module.exports = (db) => {
             limitString = `limit ${start}, ${limit}`
         }
 
+        //removed main version = 1 when duration is set 
+        if (whereClause.match(/\bduration\b/g)) {
+            let el, duration;
+            whereClause.split(' ').forEach(element => {
+                el = element.replace(/^\(/g, '');
+                if (el.trim() == 'duration') {
+                    duration = true;
+                }
+            });
+            if (duration === true) {
+                whereClause = whereClause.replace(/mainversion = 1/i, '1 = 1');
+            }
+        }
+
+
         const sql = `select ${fields} from music where ${whereClause} ${mainWhere} ${limitString}`
         const musicResult = await db.query(sql)
 
