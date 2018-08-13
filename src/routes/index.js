@@ -9,7 +9,7 @@ const mood = require ('../controller/mood')
 
 let router = express();
 
-router.enable('trust proxy')
+router.enable('trust proxy', true)
 
 router.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*')
