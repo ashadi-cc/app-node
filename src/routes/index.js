@@ -9,10 +9,23 @@ const mood = require ('../controller/mood')
 
 let router = express();
 
+router.enable('trust proxy')
+
 router.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*')
     res.header('Access-Control-Allow-Methods', 'GET,OPTIONS')
     res.header('Content-Type', 'application/vnd.api+json')
+
+    const api_key = req.headers['api-key'] ? req.headers['api-key']: ''
+
+    if (process.env.API_KEY !== api_key) {
+        res.status(401).send({
+            status: 401,
+            statusText: 'Unauthorized'
+        })
+
+        return;
+    }
 
     if ('OPTIONS' == req.method) {
         res.status(200).send('')
