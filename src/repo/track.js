@@ -167,7 +167,7 @@ module.exports = (db) => {
 
         let response = await this.getBaseQueryTrack(requestFields, whereClause)
 
-        //response.data = response.data.length ? response.data[0] : {}
+        response.data = response.data.length ? response.data[0] : {}
 
         return response
     }
