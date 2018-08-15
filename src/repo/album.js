@@ -99,13 +99,7 @@ module.exports = (db) => {
                 "type" : element.type
             })
 
-            included.push({
-                "id" : element.id,
-                "type": element.type,
-                "attributes": {
-                    "title": element.attributes.title
-                }
-            })
+            included.push(element)
         })
 
         return { relationship, included}
@@ -139,11 +133,11 @@ module.exports = (db) => {
         let response = await this.getBaseQueryAlbum(requestFields, whereClause, offset, limit)
         
         if (id) {
-            
             response.data = response.data.length ? response.data[0]: {}
             const {include} = req.query
             if (include && (include == 'tracks')) {
-                const requestTrackFields = fields.hasOwnProperty('tracks') ? fields.tracks.join(',') : ''
+                let requestTrackFields = fields.hasOwnProperty('tracks') ? fields.tracks.join(',') : 'title'
+                if (requestTrackFields.trim() == '') requestTrackFields = 'title'
                 const { relationship, included} = await includeTrack(id, requestTrackFields)
 
                 response.data.relationship = relationship
