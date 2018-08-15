@@ -52,7 +52,7 @@ module.exports = (db) => {
         folder = Path.dirname(path)
         record.url_audio = 'https://netmixeur.' + path.replace('.wav', '.mp3')
         record.url_coverart = 'https://netmixeur.' + folder + '/coverart.jpg'
-        record.url_waveform = 'https://netmixeur.' + path.replace('/AudioFiles/', '/AudioFiles/waveforms/').replace('.wav', '.mp3')
+        record.url_waveform = 'https://netmixeur.' + path.replace('/AudioFiles/', '/AudioFiles/waveforms/').replace('.wav', '.jpg')
 
         let cloneMapFields = Object.assign({}, mapFields)
         cloneMapFields.url_audio = 'url_audio'
