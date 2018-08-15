@@ -27,6 +27,7 @@ module.exports = (db) => {
     module.getPlaylist = async function (req) {
         const requestData = jsonApiParser.parseRequest(req.url)
         const fieldsRequest = requestData.queryData.fields
+        const playListId = req.params.id
 
         //request fields
         const requestFields =fieldsRequest.hasOwnProperty('playlists') ? fieldsRequest.playlists.join(',') : defaultField
@@ -46,6 +47,10 @@ module.exports = (db) => {
         if (filter) {
             const filterQuery = await utilDB.formatFilter(mapFields, filter)
             where += ` and (${filterQuery})`
+        }
+
+        if (playListId) {
+            where += ` and id = '${playListId}'`
         }
         
         //limit and offset
@@ -74,13 +79,17 @@ module.exports = (db) => {
             data.push(rec) 
         })
     
-        let links = await utilDB.getLinks(offset, limit, '_playlistbuttons', where)
+        let response = {
+            "data": data
+        }
         
-        links = await utilDB.formatLinks(req, links)
+        if (playListId) {
+            response.data = response.data.length ? response.data[0] : {}
+        } else {
+            let links = await utilDB.getLinks(offset, limit, '_playlistbuttons', where)
+            links = await utilDB.formatLinks(req, links)
 
-        const response = {
-            "data": data,
-            "links": links
+            response.links = links
         }
     
         return response    
