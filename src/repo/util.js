@@ -65,7 +65,7 @@ const util = db => {
         
         const path = originalUrl.split('?')[0]
 
-        let currentProtocol = headers['x-forwarded-proto'] ? headers['x-forwarded-proto'] : 'http'
+        let currentProtocol = headers['x-forwarded-for'] ? 'https' : protocol
 
         const url =`${currentProtocol}://${host}${path}?`
 
