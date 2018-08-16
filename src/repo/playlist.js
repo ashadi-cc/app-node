@@ -27,7 +27,7 @@ module.exports = (db) => {
     module.getPlaylist = async function (req) {
         const requestData = jsonApiParser.parseRequest(req.url)
         const fieldsRequest = requestData.queryData.fields
-        const playListId = req.params.id
+        const playListId = req.params.id ? req.params.id : ''
 
         //request fields
         const requestFields =fieldsRequest.hasOwnProperty('playlists') ? fieldsRequest.playlists.join(',') : defaultField
