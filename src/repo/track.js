@@ -28,7 +28,7 @@ module.exports = (db) => {
         "trackversion": "trackversion",
         "url_audio": "path",
         "url_coverart": "path",
-        "url_waveform": "path"
+        "url_waveform": "svgurl"
     }
 
     //default display fields
@@ -50,10 +50,14 @@ module.exports = (db) => {
         path = record.path.toString().replace(':', '/')
         //filename = Path.basename(path)
         folder = Path.dirname(path)
-        record.url_audio = 'https://netmixeur.' + path.replace('.wav', '.mp3')
-        record.url_coverart = 'https://netmixeur.' + folder + '/coverart.jpg'
-        record.url_waveform = 'https://netmixeur.' + path.replace('/AudioFiles/', '/AudioFiles/waveforms/').replace('.wav', '.jpg')
-
+        record.url_audio = encodeURI('https://netmixeur.' + path.replace('.wav', '.mp3'))
+        record.url_coverart = encodeURI('https://netmixeur.' + folder + '/coverart.jpg')
+        if (record.svgurl) {
+            record.url_waveform = record.svgurl
+        } else {
+            record.url_waveform = encodeURI('https://netmixeur.' + path.replace('/AudioFiles/', '/AudioFiles/waveforms/').replace('.wav', '.jpg'))
+        }
+        
         let cloneMapFields = Object.assign({}, mapFields)
         cloneMapFields.url_audio = 'url_audio'
         cloneMapFields.url_coverart = 'url_coverart'
@@ -103,8 +107,8 @@ module.exports = (db) => {
 
         let arrayqueryField = requestFields.toString().toLowerCase().split(',')
         //remove id
-        arrayqueryField = arrayqueryField.filter(e => e !== 'id');
-        arrayqueryField = arrayqueryField.filter(e => e !== 'path');
+        arrayqueryField = arrayqueryField.filter(e => e !== 'id')
+        arrayqueryField = arrayqueryField.filter(e => e !== 'path')
 
         musicResult.forEach(element => {
             item = mappingField(arrayqueryField, element)
